@@ -1,0 +1,53 @@
+from flask import *
+from flask_openid import OpenID
+from flask_jwt import JWT
+import secrets, time, requests
+
+app = Flask(__name__)
+
+oid = OpenID(app);
+
+    
+@app.route('/', methods=['GET'])
+def index():
+    isAuth = True;
+
+    user_info = "default"
+
+    # authenticate ??
+
+
+    # respond
+
+    if(isAuth):
+        return "current user: " + user_info
+    else:
+        abort(401)
+
+
+
+@app.route('/response', methods=['GET', 'POST'])
+def response_handle():
+    error = request.args.get('error')
+    state = request.args.get('state')
+    code = request.args.get('code')
+    
+    
+    if error != None:
+        abort(401)
+    else:
+        # establish token
+
+        
+        # retrieve and display user info from login.gov
+
+
+        user_info = get_user_info( token.access_token )
+
+        
+        return "auth"
+
+    
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port="80")

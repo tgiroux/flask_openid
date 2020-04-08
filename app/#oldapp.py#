@@ -1,0 +1,109 @@
+from flask import *
+from flask_openid import OpenID
+from flask_jwt import JWT
+import secrets, time
+
+app = Flask(__name__)
+
+oid = OpenID(app);
+
+
+# where do I really get this value?
+client_id = "registered_uuid" # dummy value, must be registered
+
+
+def req_token(code):
+    # end a HTTP POST request to the /api/openid_connect/token endpoint with the following parameters in the request body:
+
+    client_assertion = generate_client_assertion()
+    client_assertion_type = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+    code = code
+    grant_type = "authorization_code"
+
+
+    
+    request_url = (
+    f"https://idp.int.identitysandbox.gov/openid_connect/token?"
+    f"client_assertion={client_assertion}&"
+    f"response_type=code&"
+    f"scope={scope}&"
+    f"state={state}"
+    )
+
+
+
+def generate_client_assertion():
+    iss = client_id
+    sub = client_id
+    aud = "https%3A%2F%2Fidp.int.identitysandbox.gov%2Fapi%2Fopenid_connect%2Ftoken"
+    jti = secrets.token_urlsafe()
+    exp = time.time() + 300 # 5 minutes from now
+    exp = str(exp)
+
+    client_assertion = JWT(iss, sub, aud, jti, exp)
+
+    return client_assertion
+
+
+    
+def req_auth():
+    acr_values = "http%3A%2F%2Fidmanagement.gov%2Fns%2Fassurance%2Fial%2F1"
+    client_id = client_id
+    nonce = secrets.token_urlsafe()
+    response_type = "code"
+    redirect_uri = "localhost:5000/secure"
+    scope = "openid+profile"
+    state = "abcdefghijklmnopabcdefghijklmnop"
+
+
+    request_url = (
+    f"https://idp.int.identitysandbox.gov/openid_connect/authorize?"
+    f"acr_values={acr_values}&"
+    f"client_id={client_id}&"
+    f"nonce={nonce}&"
+    f"redirect_uri={redirect_uri}&"
+    f"response_type=code&"
+    f"scope={scope}&"
+    f"state={state}"
+    )
+    
+    redirect(request_url)
+
+
+@app.route('/', methods=['GET'])
+def index():
+    isAuth = True;
+
+    user_info = "default"
+
+    # authenticate ??
+
+
+    # respond
+
+    if(isAuth):
+        return "current user: " + user_info
+    else:
+        abort(401)
+
+
+
+@app.route('/response', methods=['GET', 'POST'])
+def response_handle():
+    error = request.args.get('error')
+    state = request.args.get('state')
+    code = request.args.get('code')
+    
+    
+    if error != None:
+        abort(401)
+    else:
+        # establish token
+
+        
+        # retrieve and display user info from login.gov
+        return "auth"
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port="80")
